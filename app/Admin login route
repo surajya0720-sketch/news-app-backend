@@ -1,0 +1,28 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+
+from app.database import get_db
+from app.models import Admin
+
+router = APIRouter(
+    prefix="/admin",
+    tags=["Admin"]
+)
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+@router.post("/login")
+def admin_login(username: str, password: str, db: Session = Depends(get_db)):
+    admin = db.query(Admin).filter(Admin.username == username).first()
+
+    if not admin:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    if not pwd_context.verify(password, admin.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    return {
+        "message": "Admin login successful",
+        "admin": admin.username
+    }
