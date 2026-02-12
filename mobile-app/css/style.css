@@ -1,0 +1,33 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+}
+
+header {
+    background: #d90429;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.app-container {
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    min-height: 100vh;
+}
+
+.news-card {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.news-card h3 {
+    margin: 0 0 8px 0;
+}
+
+.news-card p {
+    color: #555;
+    font-size: 14px;
+}
