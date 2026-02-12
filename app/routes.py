@@ -1,33 +1,51 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app import models
-import bcrypt
+from app import models, schemas
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/news",
+    tags=["News"]
+)
 
-# ======================
-# 🔐 ADMIN LOGIN
-# ======================
+# =========================
+# CREATE NEWS
+# =========================
+@router.post("/", response_model=schemas.NewsResponse)
+def create_news(news: schemas.NewsCreate, db: Session = Depends(get_db)):
 
-@router.post("/admin/login")
-def admin_login(username: str, password: str, db: Session = Depends(get_db)):
-    admin = db.query(models.Admin).filter(models.Admin.username == username).first()
+    new_news = models.News(
+        title=news.title,
+        content=news.content,
+        category=news.category
+    )
 
-    if not admin:
-        raise HTTPException(status_code=401, detail="Invalid username")
+    db.add(new_news)
+    db.commit()
+    db.refresh(new_news)
 
-    if not bcrypt.checkpw(password.encode('utf-8'), admin.password_hash.encode('utf-8')):
-        raise HTTPException(status_code=401, detail="Invalid password")
-
-    return {"message": "Login successful"}
+    return new_news
 
 
-# ======================
-# 📰 GET ALL NEWS
-# ======================
-
-@router.get("/news/")
+# =========================
+# GET ALL NEWS
+# =========================
+@router.get("/", response_model=list[schemas.NewsResponse])
 def get_news(db: Session = Depends(get_db)):
+
     news = db.query(models.News).all()
+    return news
+
+
+# =========================
+# GET SINGLE NEWS
+# =========================
+@router.get("/{news_id}", response_model=schemas.NewsResponse)
+def get_single_news(news_id: int, db: Session = Depends(get_db)):
+
+    news = db.query(models.News).filter(models.News.id == news_id).first()
+
+    if not news:
+        raise HTTPException(status_code=404, detail="News not found")
+
     return news
