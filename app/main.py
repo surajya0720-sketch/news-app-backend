@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
+from app import models
 from app.routes import router
 
 app = FastAPI(title="News App API")
